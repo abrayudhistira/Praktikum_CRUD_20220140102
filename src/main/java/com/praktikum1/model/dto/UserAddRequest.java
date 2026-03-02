@@ -1,5 +1,9 @@
 package com.praktikum1.model.dto;
 
-public class UserAddRequest {
+import lombok.Data;
 
+@Data
+public class UserAddRequest {
+    private String name;
+    private int age;
 }
