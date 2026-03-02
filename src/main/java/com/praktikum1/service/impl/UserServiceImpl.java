@@ -73,11 +73,16 @@ public class UserServiceImpl implements UserService {
                 .age(request.getAge())
                 .build();
 
+        userRepository.save(user);
+
+        return UserMapper.MAPPER.toUserDtoData(user);
+
     }
 
     @Override
     public void DeleteUser(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("user not found"));
+        userRepository.delete(user);
     }
 
 }
