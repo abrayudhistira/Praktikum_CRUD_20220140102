@@ -1,8 +1,11 @@
 package com.praktikum1.service.impl;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.praktikum1.model.dto.UserAddRequest;
 import com.praktikum1.model.dto.UserDto;
@@ -10,7 +13,9 @@ import com.praktikum1.model.entity.User;
 import com.praktikum1.repository.UserRepository;
 import com.praktikum1.service.UserService;
 import com.praktikum1.util.ValidationUtil;
+import com.praktikum1.mapper.UserMapper;
 
+@Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -33,17 +38,7 @@ public class UserServiceImpl implements UserService {
 
         UserDto userDto = UserMapper.MAPPER.toUserDtoData(saveUser);
 
-        User saveUser = User.builder()
-                .id(UUID.randomUUID().toString())
-                .name(request.getName())
-                .age(request.getAge())
-                .build();
-
-        userRepository.save(saveUser);
-
-        UserDto userDto = UserMapper.MAPPER.toUserDtoData(saveUser);
-
-        return userDto
+        return userDto;
     }
 
     @Override
@@ -59,6 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("user not found"));
+        return UserMapper.MAPPER.toUserDtoData(user);
     }
 
     @Override
