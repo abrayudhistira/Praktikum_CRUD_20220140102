@@ -58,12 +58,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("user not found"));
     }
 
     @Override
     public UserDto updateUser(String id, UserAddRequest request) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        validationUtil.validate(request);
+
+        User existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("user not found"));
+
+        User user = User.builder()
+                .id(existingUser.getId())
+                .name(request.getName())
+                .age(request.getAge())
+                .build();
+
     }
 
     @Override
