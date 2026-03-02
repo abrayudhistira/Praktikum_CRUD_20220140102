@@ -3,157 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen User - Praktikum 1</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>User Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --black: #0a0a0a;
+            --white: #f5f4f0;
+            --gray-100: #ebebeb;
+            --gray-200: #d4d4d4;
+            --gray-400: #9a9a9a;
+            --gray-600: #5a5a5a;
+            --accent: #e8ff47;
+            --accent-dark: #c8df20;
+            --danger: #ff4747;
+            --danger-dark: #d43030;
+            --radius: 4px;
+            --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: var(--white);
+            color: var(--black);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Top bar */
+        .topbar {
+            background: var(--black);
+            padding: 18px 48px;
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+        .topbar-sub {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* Form card */
+        .form-card {
+            background: var(--black);
+            border-radius: 6px;
+            padding: 32px 36px;
+            margin-bottom: 36px;
+            position: relative;
+            overflow: hidden;
+        }
+        .form-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--accent);
+        }
+
+        .form-label-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+        .form-card-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.1rem;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--white);
+            letter-spacing: -0.01em;
+        }
+        .mode-badge {
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            background: var(--accent);
+            color: var(--black);
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .mode-badge.edit { background: #fff; }
+
+        .fields-row {
+            display: grid;
+            grid-template-columns: 1fr 160px auto;
+            gap: 14px;
+            align-items: end;
+        }
+
+        .field-group { display: flex; flex-direction: column; gap: 6px; }
+        .field-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+        }
+        .field-input {
+            background: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            color: var(--white);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.88rem;
+            padding: 11px 14px;
+            border-radius: var(--radius);
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+        }
+        .field-input::placeholder { color: #444; }
+        .field-input:focus {
+            border-color: var(--accent);
+            background: #141414;
+        }
+        .field-input:focus::placeholder { color: #666; }
+
+        /* Remove number spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .btn-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            font-weight: 500;
+            padding: 11px 18px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: var(--black);
+        }
+        .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--gray-400);
+            border: 1px solid #333;
+        }
+        .btn-secondary:hover { color: var(--white); border-color: #666; }
+
+        /* Table */
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .table-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.05rem;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--black);
+        }
+        .count-badge {
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+            border: 1px solid var(--gray-200);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .table-wrap {
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background: var(--black);
+        }
+        th {
+            font-size: 0.63rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 400;
+        }
+        th:last-child { text-align: right; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--gray-100);
+            transition: background var(--transition);
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f0efe9; }
+
+        td {
+            padding: 15px 18px;
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+
+        .td-id {
+            font-size: 0.72rem;
+            color: var(--gray-400);
+            letter-spacing: 0.04em;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .td-name { font-weight: 500; color: var(--black); }
+        .td-age {
+            font-variant-numeric: tabular-nums;
+            color: var(--gray-600);
+        }
+        .td-actions {
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            padding: 7px 14px;
+            border: 1px solid transparent;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-edit {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+        .btn-edit:hover {
+            background: var(--accent);
+            color: var(--black);
+            border-color: var(--accent);
+        }
+        .btn-delete {
+            background: transparent;
+            color: var(--gray-400);
+            border-color: var(--gray-200);
+        }
+        .btn-delete:hover {
+            background: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 60px 24px;
+            text-align: center;
+        }
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            opacity: 0.25;
+        }
+        .empty-text {
+            font-size: 0.8rem;
+            color: var(--gray-400);
+            letter-spacing: 0.08em;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--black);
+            color: var(--white);
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            padding: 12px 24px;
+            border-radius: 4px;
+            border-left: 3px solid var(--accent);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            white-space: nowrap;
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        #toast.danger { border-left-color: var(--danger); }
+
+        /* Row entrance animation */
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        tbody tr { animation: rowIn 0.22s ease both; }
+
+        /* Confirm modal */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(10,10,10,0.6);
+            backdrop-filter: blur(2px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 500;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--white);
+            border-radius: 6px;
+            padding: 32px;
+            width: 340px;
+            transform: scale(0.95) translateY(8px);
+            transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-overlay.show .modal { transform: scale(1) translateY(0); }
+        .modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .modal-body { font-size: 0.8rem; color: var(--gray-600); margin-bottom: 24px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-modal-cancel {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            padding: 9px 18px;
+            background: transparent;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--gray-600);
+        }
+        .btn-modal-cancel:hover { border-color: var(--black); color: var(--black); }
+        .btn-modal-confirm {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            padding: 9px 18px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-modal-confirm:hover { background: var(--danger-dark); }
+
+        @media (max-width: 640px) {
+            .topbar { padding: 16px 20px; }
+            .main { padding: 28px 16px 60px; }
+            .form-card { padding: 24px 20px; }
+            .fields-row { grid-template-columns: 1fr; }
+            .btn-row { flex-direction: row; }
+        }
+    </style>
 </head>
-<body class="container mt-5">
-    <h2 class="mb-4">Daftar Pengguna</h2>
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title" id="formTitle">Tambah User</h5>
-            <form id="userForm">
-                <input type="hidden" id="userId">
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <label class="form-label">Nama</label>
-                        <input type="text" id="userName" class="form-control" placeholder="Masukkan nama lengkap" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Umur</label>
-                        <input type="number" id="userAge" class="form-control" placeholder="Contoh: 20" required>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="submit" id="btnSubmit" class="btn btn-primary w-100">Simpan Data</button>
-                        <button type="button" id="btnCancel" class="btn btn-secondary ms-2" style="display:none;" onclick="resetForm()">Batal</button>
-                    </div>
+<body>
+
+<div class="topbar">
+    <span class="topbar-title">Users</span>
+    <span class="topbar-sub">Management Panel · Praktikum 1</span>
+</div>
+
+<div class="main">
+
+    <!-- Form -->
+    <div class="form-card">
+        <div class="form-label-row">
+            <span class="form-card-title" id="formTitle">Add new user</span>
+            <span class="mode-badge" id="modeBadge">New</span>
+        </div>
+        <form id="userForm" autocomplete="off">
+            <input type="hidden" id="userId">
+            <div class="fields-row">
+                <div class="field-group">
+                    <label class="field-label" for="userName">Full Name</label>
+                    <input type="text" id="userName" class="field-input" placeholder="e.g. Abra Yudhistira" required>
                 </div>
-            </form>
+                <div class="field-group">
+                    <label class="field-label" for="userAge">Age</label>
+                    <input type="number" id="userAge" class="field-input" placeholder="20" min="1" max="120" required>
+                </div>
+                <div class="btn-row">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
+                    <button type="button" id="btnCancel" class="btn btn-secondary" style="display:none;" onclick="resetForm()">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-header">
+        <span class="table-title">All users</span>
+        <span class="count-badge" id="countBadge">0 records</span>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+        <div class="modal-title">Delete user?</div>
+        <div class="modal-body">This action is permanent and cannot be undone. The user record will be removed from the system.</div>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-modal-confirm" id="confirmDeleteBtn">Delete</button>
         </div>
     </div>
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>ID (Auto)</th>
-                <th>Nama</th>
-                <th>Umur</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="userTableBody">
-        </tbody>
-    </table>
-    <script>
-        const apiUrl = '/api/users';
-        let isUpdate = false;
+</div>
 
-        $(document).ready(function() {
-            loadUsers();
-            $('#userForm').submit(function(e) {
-                e.preventDefault();
-                const userData = {
-                    name: $('#userName').val(),
-                    age: parseInt($('#userAge').val())
-                };
-                if (isUpdate) {
-                    const id = $('#userId').val();
-                    updateUser(id, userData);
-                } else {
-                    addUser(userData);
-                }
-            });
-        });
+<!-- Toast -->
+<div id="toast"></div>
 
-        // 1. Ambil Semua Data (GET)
-        function loadUsers() {
-            $.get(apiUrl, function(response) {
-                let rows = '';
-                response.data.forEach(user => {
-                    rows += `<tr>
-                        <td class="text-muted" style="font-size: 0.85rem;">${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.age}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editUser('${user.id}', '${user.name}', ${user.age})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')">Hapus</button>
-                        </td>
-                    </tr>`;
-                });
-                $('#userTableBody').html(rows);
-            });
-        }
+<script>
+    const apiUrl = '/api/users';
+    let isUpdate = false;
+    let pendingDeleteId = null;
 
-        // 2. Tambah Data (POST)
-        function addUser(data) {
-            $.ajax({
-                url: apiUrl,
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function() {
-                    resetForm();
-                    loadUsers();
-                    alert('User berhasil ditambahkan (ID Otomatis)');
-                },
-                error: function() {
-                    alert('Gagal menambah user.');
-                }
-            });
-        }
-
-        // 3. Update Data (PUT)
-        function updateUser(id, data) {
-            $.ajax({
-                url: `${apiUrl}/${id}`,
-                type: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function() {
-                    resetForm();
-                    loadUsers();
-                    alert('Data berhasil diperbarui!');
-                },
-                error: function() {
-                    alert('Gagal memperbarui user.');
-                }
-            });
-        }
-
-        // 4. Hapus Data (DELETE)
-        function deleteUser(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-                $.ajax({
-                    url: `${apiUrl}/${id}`,
-                    type: 'DELETE',
-                    success: function() {
-                        loadUsers();
-                        alert('User telah dihapus.');
-                    }
-                });
+    $(document).ready(function() {
+        loadUsers();
+        $('#userForm').submit(function(e) {
+            e.preventDefault();
+            const userData = {
+                name: $('#userName').val().trim(),
+                age: parseInt($('#userAge').val())
+            };
+            if (isUpdate) {
+                updateUser($('#userId').val(), userData);
+            } else {
+                addUser(userData);
             }
-        }
+        });
+    });
 
-        // Helper: Masuk ke Mode Edit
-        function editUser(id, name, age) {
-            $('#userId').val(id);
-            $('#userName').val(name);
-            $('#userAge').val(age);
-            $('#formTitle').text('Edit User');
-            $('#btnSubmit').text('Update User').removeClass('btn-primary').addClass('btn-success');
-            $('#btnCancel').show();
-            isUpdate = true;
-        }
+    function loadUsers() {
+        $.get(apiUrl, function(response) {
+            const users = response.data;
+            $('#countBadge').text(users.length + ' record' + (users.length !== 1 ? 's' : ''));
+            if (users.length === 0) {
+                $('#userTableBody').html(`
+                    <tr><td colspan="4" style="padding:0;border:none;">
+                        <div class="empty-state">
+                            <div class="empty-icon">◎</div>
+                            <div class="empty-text">No users found. Add one above.</div>
+                        </div>
+                    </td></tr>`);
+                return;
+            }
+            let rows = '';
+            users.forEach(user => {
+                const shortId = user.id.length > 12 ? user.id.substring(0, 12) + '…' : user.id;
+                rows += `<tr>
+                    <td class="td-id" title="${user.id}">${shortId}</td>
+                    <td class="td-name">${escHtml(user.name)}</td>
+                    <td class="td-age">${user.age}</td>
+                    <td class="td-actions">
+                        <button class="btn-icon btn-edit" onclick="editUser('${user.id}', '${escAttr(user.name)}', ${user.age})">Edit</button>
+                        <button class="btn-icon btn-delete" onclick="openDeleteModal('${user.id}')">Delete</button>
+                    </td>
+                </tr>`;
+            });
+            $('#userTableBody').html(rows);
+        }).fail(function() {
+            showToast('Failed to load users.', true);
+        });
+    }
 
-        // Helper: Reset Form ke Mode Tambah
-        function resetForm() {
-            $('#userId').val('');
-            $('#userName').val('');
-            $('#userAge').val('');
-            $('#formTitle').text('Tambah User');
-            $('#btnSubmit').text('Simpan Data').removeClass('btn-success').addClass('btn-primary');
-            $('#btnCancel').hide();
-            isUpdate = false;
+    function addUser(data) {
+        $.ajax({
+            url: apiUrl, type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function() {
+                resetForm(); loadUsers();
+                showToast('User added successfully.');
+            },
+            error: function() { showToast('Failed to add user.', true); }
+        });
+    }
+
+    function updateUser(id, data) {
+        $.ajax({
+            url: `${apiUrl}/${id}`, type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function() {
+                resetForm(); loadUsers();
+                showToast('User updated.');
+            },
+            error: function() { showToast('Failed to update user.', true); }
+        });
+    }
+
+    function deleteUser(id) {
+        $.ajax({
+            url: `${apiUrl}/${id}`, type: 'DELETE',
+            success: function() { loadUsers(); showToast('User deleted.'); },
+            error: function() { showToast('Failed to delete user.', true); }
+        });
+    }
+
+    function editUser(id, name, age) {
+        $('#userId').val(id);
+        $('#userName').val(name);
+        $('#userAge').val(age);
+        $('#formTitle').text('Edit user');
+        $('#modeBadge').text('Editing').addClass('edit');
+        $('#btnSubmit').text('Update');
+        $('#btnCancel').show();
+        isUpdate = true;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => $('#userName').focus(), 300);
+    }
+
+    function resetForm() {
+        $('#userId, #userName, #userAge').val('');
+        $('#formTitle').text('Add new user');
+        $('#modeBadge').text('New').removeClass('edit');
+        $('#btnSubmit').text('Save');
+        $('#btnCancel').hide();
+        isUpdate = false;
+    }
+
+    function openDeleteModal(id) {
+        pendingDeleteId = id;
+        $('#deleteModal').addClass('show');
+    }
+
+    function closeModal() {
+        $('#deleteModal').removeClass('show');
+        pendingDeleteId = null;
+    }
+
+    $('#confirmDeleteBtn').on('click', function() {
+        if (pendingDeleteId) {
+            deleteUser(pendingDeleteId);
+            closeModal();
         }
-    </script>
+    });
+
+    $('#deleteModal').on('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    let toastTimer;
+    function showToast(msg, isError = false) {
+        const t = $('#toast');
+        t.text(msg).toggleClass('danger', isError).addClass('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.removeClass('show'), 3000);
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function escAttr(str) {
+        return String(str).replace(/'/g,"\\'");
+    }
+</script>
 </body>
 </html>
